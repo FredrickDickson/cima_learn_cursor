@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import InstructorDashboard from './pages/InstructorDashboard';
 import MyCourses from './pages/MyCourses';
 import PaymentCallback from './pages/PaymentCallback';
+import Search from './pages/Search';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/search" element={<Search />} />
             <Route
               path="/dashboard"
               element={

@@ -16,6 +16,14 @@ const InstructorDashboard = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState('');
+  const [showLectureForm, setShowLectureForm] = useState(false);
+  const [lectureData, setLectureData] = useState({
+    title: '',
+    description: '',
+    videoUrl: '',
+    duration: 0,
+    order: 0,
+  });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -23,6 +31,7 @@ const InstructorDashboard = () => {
     level: 'Beginner',
     price: 0,
     thumbnail: '',
+    lectures: [],
   });
 
   useEffect(() => {
@@ -45,6 +54,37 @@ const InstructorDashboard = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleLectureChange = (e) => {
+    setLectureData({
+      ...lectureData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleAddLecture = () => {
+    if (!lectureData.title || !lectureData.videoUrl) {
+      alert('Lecture title and video URL are required.');
+      return;
+    }
+    setFormData({
+      ...formData,
+      lectures: [...formData.lectures, { ...lectureData, order: formData.lectures.length + 1 }],
+    });
+    setLectureData({
+      title: '',
+      description: '',
+      videoUrl: '',
+      duration: 0,
+      order: 0,
+    });
+    setShowLectureForm(false);
+  };
+
+  const handleRemoveLecture = (index) => {
+    const updatedLectures = formData.lectures.filter((_, i) => i !== index);
+    setFormData({ ...formData, lectures: updatedLectures });
   };
 
   const handleSubmit = async (e) => {
@@ -122,8 +162,9 @@ const InstructorDashboard = () => {
       if (res.data.success) {
         // Get the full URL
         const videoUrl = `${config.API_URL}${res.data.data.url}`;
-        setUploadedVideoUrl(videoUrl);
-        alert('Video uploaded successfully! Copy the URL to use in your course.');
+        setLectureData({ ...lectureData, videoUrl });
+        setShowLectureForm(true);
+        setShowUploadModal(false);
         setSelectedVideo(null);
         setUploadProgress(0);
       }
@@ -284,7 +325,99 @@ const InstructorDashboard = () => {
               >
                 📤 Upload Video
               </button>
+              <button
+                type="button"
+                onClick={() => setShowLectureForm(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              >
+                + Add Lecture
+              </button>
             </div>
+
+            {showLectureForm && (
+              <div className="bg-gray-50 p-4 rounded-md mt-4">
+                <h3 className="text-xl font-semibold mb-2">New Lecture</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Lecture Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={lectureData.title}
+                      onChange={handleLectureChange}
+                      className="w-full px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Lecture Description</label>
+                    <textarea
+                      name="description"
+                      value={lectureData.description}
+                      onChange={handleLectureChange}
+                      className="w-full px-3 py-2 border rounded-md"
+                      rows="2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Video URL</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        name="videoUrl"
+                        value={lectureData.videoUrl}
+                        onChange={handleLectureChange}
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder="Upload or paste URL"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowUploadModal(true)}
+                        className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition"
+                      >
+                        📤
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowLectureForm(false)}
+                      className="text-sm text-gray-600"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddLecture}
+                      className="bg-primary text-white px-4 py-2 rounded-md hover:bg-secondary transition"
+                    >
+                      Add Lecture
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {formData.lectures.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-2">Lectures</h3>
+                <ul className="space-y-2">
+                  {formData.lectures.map((lecture, index) => (
+                    <li key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded-md">
+                      <span>{lecture.order}. {lecture.title}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLecture(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <button
               type="submit"
               className="bg-primary text-white px-6 py-2 rounded-md hover:bg-secondary transition"

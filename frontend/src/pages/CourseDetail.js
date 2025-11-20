@@ -13,10 +13,19 @@ const CourseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [enrolled, setEnrolled] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewFormData, setReviewFormData] = useState({
+    rating: 0,
+    comment: '',
+  });
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   useEffect(() => {
     fetchCourse();
-    if (user) checkEnrollment();
+    if (user) {
+      checkEnrollment();
+      fetchReviews();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user]);
 
@@ -28,6 +37,18 @@ const CourseDetail = () => {
       console.error('Error fetching course:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const res = await axios.get(`${config.API_URL}/api/reviews/course/${id}`);
+      setReviews(res.data.data);
+      if (user) {
+        setHasReviewed(res.data.data.some(review => review.student._id === user.id));
+      }
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
     }
   };
 
@@ -80,6 +101,34 @@ const CourseDetail = () => {
     }
   };
 
+  const handleReviewChange = (e) => {
+    setReviewFormData({
+      ...reviewFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert('Please login to submit a review.');
+      return;
+    }
+    if (reviewFormData.rating === 0) {
+      alert('Please provide a rating.');
+      return;
+    }
+    try {
+      await axios.post(`${config.API_URL}/api/reviews/course/${id}`, reviewFormData);
+      setReviewFormData({ rating: 0, comment: '' });
+      fetchReviews(); // Refresh reviews
+      fetchCourse(); // Refresh course to update average rating
+      alert('Review submitted successfully!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to submit review.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -100,6 +149,13 @@ const CourseDetail = () => {
         <div className="md:col-span-2">
           <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
           <p className="text-gray-600 mb-6">{course.description}</p>
+
+          {/* Average Rating Display */}
+          <div className="flex items-center space-x-2 mb-6">
+            <span className="text-yellow-400 text-xl">⭐</span>
+            <span className="text-xl font-bold">{course.rating.toFixed(1)}</span>
+            <span className="text-gray-600">({course.numberOfReviews} reviews)</span>
+          </div>
 
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Course Content</h2>
@@ -128,6 +184,75 @@ const CourseDetail = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Review Submission Form */}
+          {user && enrolled && !hasReviewed && (
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Submit Your Review</h2>
+              <form onSubmit={handleSubmitReview} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Rating</label>
+                  <div className="flex items-center space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`cursor-pointer text-3xl ${
+                          star <= reviewFormData.rating ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
+                        onClick={() => setReviewFormData({ ...reviewFormData, rating: star })}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Comment</label>
+                  <textarea
+                    name="comment"
+                    value={reviewFormData.comment}
+                    onChange={handleReviewChange}
+                    className="w-full px-3 py-2 border rounded-md"
+                    rows="4"
+                    placeholder="Share your thoughts about this course..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-primary text-white px-6 py-2 rounded-md hover:bg-secondary transition"
+                >
+                  Submit Review
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Reviews List */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Student Reviews</h2>
+            {reviews.length > 0 ? (
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review._id} className="bg-white rounded-lg shadow-sm p-4 border">
+                    <div className="flex items-center mb-2">
+                      <p className="font-semibold mr-2">{review.student?.name}</p>
+                      <div className="flex text-yellow-400">
+                        {Array(review.rating).fill('★').map((_, i) => (
+                          <span key={i}>★</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-gray-700 mb-2">{review.comment}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600">No reviews yet. Be the first to review this course!</p>
+            )}
           </div>
         </div>
 

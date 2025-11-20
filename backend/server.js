@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const { setupTestDB } = require('./setupTestDB');
 
 dotenv.config();
 
@@ -39,22 +38,26 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Start server with in-memory MongoDB
-const startServer = async () => {
+// Connect to MongoDB
+const connectDB = async () => {
   try {
-    const mongoUri = await setupTestDB();
-
-    await mongoose.connect(mongoUri);
-
-    console.log('MongoDB Connected (In-Memory)');
-
-    const PORT = process.env.PORT || 3001;
-    const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-    app.listen(PORT, HOST, () => console.log(`Server running on ${HOST}:${PORT}`));
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error(`Error: ${err.message}`);
     process.exit(1);
   }
+};
+
+// Start server
+const startServer = async () => {
+  await connectDB();
+  const PORT = process.env.PORT || 3001;
+  const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  app.listen(PORT, HOST, () => console.log(`Server running on ${HOST}:${PORT}`));
 };
 
 startServer();
