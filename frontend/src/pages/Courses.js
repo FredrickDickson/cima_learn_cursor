@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
@@ -20,7 +21,7 @@ const Courses = () => {
       if (filters.category) params.category = filters.category;
       if (filters.level) params.level = filters.level;
       
-      const res = await axios.get('http://localhost:5000/api/courses', { params });
+      const res = await axios.get(`${config.API_URL}/api/courses`, { params });
       setCourses(res.data.data);
     } catch (err) {
       console.error('Error fetching courses:', err);

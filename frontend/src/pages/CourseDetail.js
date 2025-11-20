@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import config from '../config';
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -21,7 +22,7 @@ const CourseDetail = () => {
 
   const fetchCourse = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/courses/${id}`);
+      const res = await axios.get(`${config.API_URL}/api/courses/${id}`);
       setCourse(res.data.data);
     } catch (err) {
       console.error('Error fetching course:', err);
@@ -32,7 +33,7 @@ const CourseDetail = () => {
 
   const checkEnrollment = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/enrollments/${id}/progress`);
+      const res = await axios.get(`${config.API_URL}/api/enrollments/${id}/progress`);
       setEnrolled(true);
     } catch (err) {
       // Not enrolled
@@ -48,7 +49,7 @@ const CourseDetail = () => {
     // Check if course is free
     if (course.price === 0) {
       try {
-        await axios.post(`http://localhost:5000/api/enrollments/${id}`);
+        await axios.post(`${config.API_URL}/api/enrollments/${id}`);
         setEnrolled(true);
         alert('Successfully enrolled in course!');
         navigate('/my-courses');
@@ -62,7 +63,7 @@ const CourseDetail = () => {
     setProcessingPayment(true);
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/payments/initialize',
+        `${config.API_URL}/api/payments/initialize`,
         {
           courseId: id,
           email: user.email,

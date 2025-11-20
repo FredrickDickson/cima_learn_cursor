@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
@@ -20,7 +21,7 @@ const PaymentCallback = () => {
       }
 
       try {
-        const response = await axios.post('http://localhost:5000/api/payments/verify', {
+        const response = await axios.post(`${config.API_URL}/api/payments/verify`, {
           reference: reference
         });
 

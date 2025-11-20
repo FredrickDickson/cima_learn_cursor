@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import config from '../config';
 
 const InstructorDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -30,7 +31,7 @@ const InstructorDashboard = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/courses/instructor/my-courses');
+      const res = await axios.get(`${config.API_URL}/api/courses/instructor/my-courses`);
       setCourses(res.data.data);
     } catch (err) {
       console.error('Error fetching courses:', err);
@@ -49,7 +50,7 @@ const InstructorDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/courses', formData);
+      await axios.post(`${config.API_URL}/api/courses`, formData);
       fetchCourses();
       setShowForm(false);
       setFormData({
@@ -68,7 +69,7 @@ const InstructorDashboard = () => {
   const handleDelete = async (courseId) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/courses/${courseId}`);
+        await axios.delete(`${config.API_URL}/api/courses/${courseId}`);
         fetchCourses();
       } catch (err) {
         alert('Failed to delete course');
@@ -108,7 +109,7 @@ const InstructorDashboard = () => {
     setUploadProgress(0);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/upload/video', formData, {
+      const res = await axios.post(`${config.API_URL}/api/upload/video`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -120,7 +121,7 @@ const InstructorDashboard = () => {
 
       if (res.data.success) {
         // Get the full URL
-        const videoUrl = `http://localhost:5000${res.data.data.url}`;
+        const videoUrl = `${config.API_URL}${res.data.data.url}`;
         setUploadedVideoUrl(videoUrl);
         alert('Video uploaded successfully! Copy the URL to use in your course.');
         setSelectedVideo(null);
@@ -149,14 +150,14 @@ const InstructorDashboard = () => {
       formData.append('thumbnail', file);
 
       try {
-        const res = await axios.post('http://localhost:5000/api/upload/thumbnail', formData, {
+        const res = await axios.post(`${config.API_URL}/api/upload/thumbnail`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
 
         if (res.data.success) {
-          const thumbnailUrl = `http://localhost:5000${res.data.data.url}`;
+          const thumbnailUrl = `${config.API_URL}${res.data.data.url}`;
           setFormData({ ...formData, thumbnail: thumbnailUrl });
           alert('Thumbnail uploaded successfully!');
         }

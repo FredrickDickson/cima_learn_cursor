@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const { setupTestDB } = require('./setupTestDB');
 
 dotenv.config();
@@ -29,6 +30,15 @@ app.use('/api/search', require('./routes/search'));
 app.use('/api/certificates', require('./routes/certificates'));
 app.use('/webhook/paystack', require('./routes/webhook'));
 
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  });
+}
+
 // Start server with in-memory MongoDB
 const startServer = async () => {
   try {
@@ -38,8 +48,9 @@ const startServer = async () => {
 
     console.log('MongoDB Connected (In-Memory)');
 
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    const PORT = process.env.PORT || 3001;
+    const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    app.listen(PORT, HOST, () => console.log(`Server running on ${HOST}:${PORT}`));
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import ReactPlayer from 'react-player';
+import config from '../config';
 
 const MyCourses = () => {
   const { } = useContext(AuthContext);
@@ -25,7 +26,7 @@ const MyCourses = () => {
 
   const fetchEnrollments = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/enrollments');
+      const res = await axios.get(`${config.API_URL}/api/enrollments`);
       setEnrollments(res.data.data);
     } catch (err) {
       console.error('Error fetching enrollments:', err);
@@ -36,8 +37,8 @@ const MyCourses = () => {
 
   const fetchLectureDetails = async (courseId, lectureId) => {
     try {
-      const courseRes = await axios.get(`http://localhost:5000/api/courses/${courseId}`);
-      await axios.get(`http://localhost:5000/api/enrollments/${courseId}/progress`);
+      const courseRes = await axios.get(`${config.API_URL}/api/courses/${courseId}`);
+      await axios.get(`${config.API_URL}/api/enrollments/${courseId}/progress`);
       
       setSelectedCourse(courseRes.data.data);
       const lecture = courseRes.data.data.lectures.find(l => l._id === lectureId);
@@ -52,7 +53,7 @@ const MyCourses = () => {
     if (!currentLectureId) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/enrollments/${courseId}/progress`, {
+      await axios.put(`${config.API_URL}/api/enrollments/${courseId}/progress`, {
         lectureId: currentLectureId,
         completed,
         lastPosition: 0,
