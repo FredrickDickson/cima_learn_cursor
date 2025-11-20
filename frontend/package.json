@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "array.prototype.findlast": "^1.2.5",
+    "axios": "^1.5.0",
+    "es-abstract": "^1.23.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0",
-    "axios": "^1.5.0",
     "react-player": "^2.13.0",
-    "@heroicons/react": "^2.0.18",
-    "es-abstract": "^1.23.3",
+    "react-router-dom": "^6.16.0",
     "string.prototype.matchall": "^4.0.11",
-    "string.prototype.trim": "^1.2.9",
-    "array.prototype.findlast": "^1.2.5"
+    "string.prototype.trim": "^1.2.9"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -38,10 +38,10 @@
     ]
   },
   "devDependencies": {
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.3.3",
     "autoprefixer": "^10.4.15",
-    "postcss": "^8.4.29"
+    "postcss": "^8.4.29",
+    "react-scripts": "^5.0.1",
+    "tailwindcss": "^3.3.3"
   },
   "overrides": {
     "es-abstract": "^1.23.3",
@@ -50,4 +50,3 @@
     "array.prototype.findlast": "^1.2.5"
   }
 }
-

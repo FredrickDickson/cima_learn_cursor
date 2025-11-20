@@ -11,12 +11,12 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enrolled, setEnrolled] = useState(false);
-  const [enrollmentId, setEnrollmentId] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     fetchCourse();
     if (user) checkEnrollment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user]);
 
   const fetchCourse = async () => {
@@ -34,7 +34,6 @@ const CourseDetail = () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/enrollments/${id}/progress`);
       setEnrolled(true);
-      setEnrollmentId(res.data.data._id);
     } catch (err) {
       // Not enrolled
     }

@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { setupTestDB } = require('./setupTestDB');
 
 dotenv.config();
 
@@ -28,16 +29,22 @@ app.use('/api/search', require('./routes/search'));
 app.use('/api/certificates', require('./routes/certificates'));
 app.use('/webhook/paystack', require('./routes/webhook'));
 
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mediator-udemy', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.log(err));
+// Start server with in-memory MongoDB
+const startServer = async () => {
+  try {
+    const mongoUri = await setupTestDB();
 
-const PORT = process.env.PORT || 5000;
+    await mongoose.connect(mongoUri);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log('MongoDB Connected (In-Memory)');
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+};
+
+startServer();
 

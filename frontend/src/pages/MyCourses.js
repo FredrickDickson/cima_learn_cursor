@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import ReactPlayer from 'react-player';
 
 const MyCourses = () => {
-  const { user } = useContext(AuthContext);
+  const { } = useContext(AuthContext);
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -37,7 +37,7 @@ const MyCourses = () => {
   const fetchLectureDetails = async (courseId, lectureId) => {
     try {
       const courseRes = await axios.get(`http://localhost:5000/api/courses/${courseId}`);
-      const enrollmentRes = await axios.get(`http://localhost:5000/api/enrollments/${courseId}/progress`);
+      await axios.get(`http://localhost:5000/api/enrollments/${courseId}/progress`);
       
       setSelectedCourse(courseRes.data.data);
       const lecture = courseRes.data.data.lectures.find(l => l._id === lectureId);
